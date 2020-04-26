@@ -62,7 +62,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 
 func handleHomeTimeline(w http.ResponseWriter, r *http.Request) {
 	tweets, resp, err := client.Timelines.HomeTimeline(
-		&twitter.HomeTimelineParams{Count: 10},
+		&twitter.HomeTimelineParams{Count: 11},
 	)
 	if err != nil {
 		respondWithError(err, w)
