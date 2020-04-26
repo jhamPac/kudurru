@@ -1,6 +1,12 @@
 package main
 
-import "github.com/dghubble/oauth1"
+import (
+	"log"
+	"net/http"
+
+	"github.com/dghubble/oauth1"
+	"github.com/gorilla/mux"
+)
 
 // Tweet that represents tweets from twitter
 type Tweet struct {
@@ -12,4 +18,20 @@ type Tweet struct {
 var config *oauth1.Config
 var token *oauth1.Token
 
-const pages = 18
+const pages = 1
+
+func makeMuxRouter() http.Handler {
+	muxRouter := mux.NewRouter()
+	muxRouter.HandleFunc("/{id}", handleGetTweets).Methods("GET")
+	return muxRouter
+}
+
+func handleGetTweets(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func respondWithError(err error, w http.ResponseWriter) {
+	log.Println(err)
+	w.WriteHeader(500)
+	w.Write([]byte(err.Error()))
+}
