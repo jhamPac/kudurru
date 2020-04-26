@@ -1,8 +1,12 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/dghubble/oauth1"
 	"github.com/gorilla/mux"
@@ -18,20 +22,65 @@ type Tweet struct {
 var config *oauth1.Config
 var token *oauth1.Token
 
-const pages = 1
+const pages = 2
 
 func makeMuxRouter() http.Handler {
 	muxRouter := mux.NewRouter()
+	muxRouter.HandleFunc("/", handleHome).Methods("GET")
 	muxRouter.HandleFunc("/{id}", handleGetTweets).Methods("GET")
 	return muxRouter
 }
 
-func handleGetTweets(w http.ResponseWriter, r *http.Request) {
+func handleHome(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, "Kudurru, written in Stone 🗿")
+}
 
+func handleGetTweets(w http.ResponseWriter, r *http.Request) {
+	var maxIDQuery string
+	// var tweets []Tweet
+	muxVars := mux.Vars(r)
+	userHandle := muxVars["id"]
+
+	httpClient := config.Client(oauth1.NoContext, token)
+
+	for i := 0; i < pages; i++ {
+		path := fmt.Sprintf("https://api.twitter.com/1.1/statues/user_timeline.json?screen_name=%v&include_rts=false&count=10%v", userHandle, maxIDQuery)
+
+		if strings.Contains(path, "favicon.ico") {
+			break
+		}
+
+		resp, err := httpClient.Get(path)
+		if err != nil {
+			respondWithError(err, w)
+			break
+		}
+
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			respondWithError(err, w)
+			break
+		}
+
+		var gotTweets []Tweet
+		err = json.Unmarshal(body, &gotTweets)
+		if err != nil {
+			respondWithError(err, w)
+			break
+		}
+
+		fmt.Println(gotTweets)
+	}
 }
 
 func respondWithError(err error, w http.ResponseWriter) {
 	log.Println(err)
 	w.WriteHeader(500)
 	w.Write([]byte(err.Error()))
+}
+
+func main() {
+
 }
