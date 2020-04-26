@@ -13,12 +13,41 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var config *oauth1.Config
-var token *oauth1.Token
-var httpClient *http.Client
-var client *twitter.Client
-
 const pages = 2
+
+var (
+	config     *oauth1.Config
+	token      *oauth1.Token
+	httpClient *http.Client
+	client     *twitter.Client
+)
+
+func init() {
+	config = oauth1.NewConfig(os.Getenv("APIKEY"), os.Getenv("APISECRET"))
+	token = oauth1.NewToken(os.Getenv("TOKEN"), os.Getenv("TOKENSECRET"))
+	httpClient = config.Client(oauth1.NoContext, token)
+	client = twitter.NewClient(httpClient)
+}
+
+func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	s := &http.Server{
+		Addr:           "127.0.0.1:" + os.Getenv("PORT"),
+		Handler:        makeMuxRouter(),
+		ReadTimeout:    20 * time.Second,
+		WriteTimeout:   120 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+
+	fmt.Println("Kudurru listening on port:", os.Getenv("PORT"))
+	if err := s.ListenAndServe(); err != nil {
+		log.Fatal(err)
+	}
+}
 
 func makeMuxRouter() http.Handler {
 	muxRouter := mux.NewRouter()
@@ -73,29 +102,4 @@ func respondWithError(err error, w http.ResponseWriter) {
 	log.Println(err)
 	w.WriteHeader(500)
 	w.Write([]byte(err.Error()))
-}
-
-func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	config = oauth1.NewConfig(os.Getenv("APIKEY"), os.Getenv("APISECRET"))
-	token = oauth1.NewToken(os.Getenv("TOKEN"), os.Getenv("TOKENSECRET"))
-	httpClient = config.Client(oauth1.NoContext, token)
-	client = twitter.NewClient(httpClient)
-
-	s := &http.Server{
-		Addr:           "127.0.0.1:" + os.Getenv("PORT"),
-		Handler:        makeMuxRouter(),
-		ReadTimeout:    20 * time.Second,
-		WriteTimeout:   120 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-	}
-
-	fmt.Println("Kudurru listening on port:", os.Getenv("PORT"))
-	if err := s.ListenAndServe(); err != nil {
-		log.Fatal(err)
-	}
 }
