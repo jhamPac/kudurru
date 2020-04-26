@@ -22,18 +22,16 @@ var (
 	client     *twitter.Client
 )
 
-func init() {
-	config = oauth1.NewConfig(os.Getenv("APIKEY"), os.Getenv("APISECRET"))
-	token = oauth1.NewToken(os.Getenv("TOKEN"), os.Getenv("TOKENSECRET"))
-	httpClient = config.Client(oauth1.NoContext, token)
-	client = twitter.NewClient(httpClient)
-}
-
 func main() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	config = oauth1.NewConfig(os.Getenv("APIKEY"), os.Getenv("APISECRET"))
+	token = oauth1.NewToken(os.Getenv("TOKEN"), os.Getenv("TOKENSECRET"))
+	httpClient = config.Client(oauth1.NoContext, token)
+	client = twitter.NewClient(httpClient)
 
 	s := &http.Server{
 		Addr:           "127.0.0.1:" + os.Getenv("PORT"),
