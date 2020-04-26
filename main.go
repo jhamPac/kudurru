@@ -6,10 +6,13 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/dghubble/oauth1"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 // Tweet that represents tweets from twitter
@@ -82,5 +85,23 @@ func respondWithError(err error, w http.ResponseWriter) {
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	config = oauth1.NewConfig(os.Getenv("APIKEY"), os.Getenv("APISECRET"))
+	token = oauth1.NewToken(os.Getenv("TOKEN"), os.Getenv("TOKENSECRET"))
+
+	s := &http.Server{
+		Addr:           os.Getenv("PORT"),
+		Handler:        makeMuxRouter(),
+		ReadTimeout:    20 * time.Second,
+		WriteTimeout:   120 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+
+	if err := s.ListenAndServe(); err != nil {
+		log.Fatal(err)
+	}
 }
