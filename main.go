@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -24,13 +23,14 @@ type Tweet struct {
 
 var config *oauth1.Config
 var token *oauth1.Token
+var httpClient *http.Client
 
 const pages = 2
 
 func makeMuxRouter() http.Handler {
 	muxRouter := mux.NewRouter()
 	muxRouter.HandleFunc("/", handleHome).Methods("GET")
-	muxRouter.HandleFunc("/{id}", handleGetTweets).Methods("GET")
+	// muxRouter.HandleFunc("/{id}", handleGetTweets).Methods("GET")
 	return muxRouter
 }
 
@@ -40,15 +40,15 @@ func handleHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleGetTweets(w http.ResponseWriter, r *http.Request) {
-	var maxIDQuery string
+	// var maxIDQuery string
 	// var tweets []Tweet
-	muxVars := mux.Vars(r)
-	userHandle := muxVars["id"]
+	// muxVars := mux.Vars(r)
+	// userHandle := muxVars["id"]
 
 	httpClient := config.Client(oauth1.NoContext, token)
 
 	for i := 0; i < pages; i++ {
-		path := fmt.Sprintf("https://api.twitter.com/1.1/statues/user_timeline.json?screen_name=%v&include_rts=false&count=10%v", userHandle, maxIDQuery)
+		path := fmt.Sprintf("https://api.twitter.com/1.1/statues/home_timeline.json")
 
 		if strings.Contains(path, "favicon.ico") {
 			break
@@ -67,14 +67,15 @@ func handleGetTweets(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		var gotTweets []Tweet
-		err = json.Unmarshal(body, &gotTweets)
-		if err != nil {
-			respondWithError(err, w)
-			break
-		}
-
-		fmt.Println(gotTweets)
+		// var gotTweets []Tweet
+		// err = json.Unmarshal(body, &gotTweets)
+		// if err != nil {
+		// 	fmt.Printf("Error unmarshaling %v", err)
+		// 	respondWithError(err, w)
+		// 	break
+		// }
+		fmt.Printf("raw response body: \n%v\n", string(body))
+		// fmt.Println(gotTweets)
 	}
 }
 
@@ -92,15 +93,17 @@ func main() {
 
 	config = oauth1.NewConfig(os.Getenv("APIKEY"), os.Getenv("APISECRET"))
 	token = oauth1.NewToken(os.Getenv("TOKEN"), os.Getenv("TOKENSECRET"))
+	httpClient = config.Client(oauth1.NoContext, token)
 
 	s := &http.Server{
-		Addr:           os.Getenv("PORT"),
+		Addr:           "127.0.0.1:" + os.Getenv("PORT"),
 		Handler:        makeMuxRouter(),
 		ReadTimeout:    20 * time.Second,
 		WriteTimeout:   120 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 
+	fmt.Println("Kudurru listening on port:", os.Getenv("PORT"))
 	if err := s.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
