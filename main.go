@@ -50,7 +50,16 @@ func handleHomeTimeline(w http.ResponseWriter, r *http.Request) {
 func handleUserTimeline(w http.ResponseWriter, r *http.Request) {
 	muxVars := mux.Vars(r)
 	userHandle := muxVars["id"]
-	fmt.Println(userHandle)
+
+	tweets, resp, err := client.Timelines.UserTimeline(&twitter.UserTimelineParams{ScreenName: userHandle, Count: 10})
+	if err != nil {
+		respondWithError(err, w)
+	}
+	defer resp.Body.Close()
+
+	for _, tweet := range tweets {
+		w.Write([]byte(tweet.Text))
+	}
 }
 
 func respondWithError(err error, w http.ResponseWriter) {
