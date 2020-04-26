@@ -16,6 +16,7 @@ import (
 var config *oauth1.Config
 var token *oauth1.Token
 var httpClient *http.Client
+var client *twitter.Client
 
 const pages = 2
 
@@ -23,6 +24,7 @@ func makeMuxRouter() http.Handler {
 	muxRouter := mux.NewRouter()
 	muxRouter.HandleFunc("/", handleRoot).Methods("GET")
 	muxRouter.HandleFunc("/home", handleHomeTimeline).Methods("GET")
+	muxRouter.HandleFunc("/user/{id}", handleUserTimeline).Methods("GET")
 	return muxRouter
 }
 
@@ -32,10 +34,6 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleHomeTimeline(w http.ResponseWriter, r *http.Request) {
-	// muxVars := mux.Vars(r)
-	// userHandle := muxVars["id"]
-
-	client := twitter.NewClient(httpClient)
 	tweets, resp, err := client.Timelines.HomeTimeline(
 		&twitter.HomeTimelineParams{Count: 10},
 	)
@@ -45,11 +43,14 @@ func handleHomeTimeline(w http.ResponseWriter, r *http.Request) {
 	defer resp.Body.Close()
 
 	for _, tweet := range tweets {
-		fmt.Println(tweet.Text)
+		w.Write([]byte(tweet.Text))
 	}
+}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Success"))
+func handleUserTimeline(w http.ResponseWriter, r *http.Request) {
+	muxVars := mux.Vars(r)
+	userHandle := muxVars["id"]
+	fmt.Println(userHandle)
 }
 
 func respondWithError(err error, w http.ResponseWriter) {
@@ -67,6 +68,7 @@ func main() {
 	config = oauth1.NewConfig(os.Getenv("APIKEY"), os.Getenv("APISECRET"))
 	token = oauth1.NewToken(os.Getenv("TOKEN"), os.Getenv("TOKENSECRET"))
 	httpClient = config.Client(oauth1.NoContext, token)
+	client = twitter.NewClient(httpClient)
 
 	s := &http.Server{
 		Addr:           "127.0.0.1:" + os.Getenv("PORT"),
