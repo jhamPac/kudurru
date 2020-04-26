@@ -2,24 +2,16 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
+	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
-
-// Tweet that represents tweets from twitter
-type Tweet struct {
-	Date string `json:"created_at"`
-	Text string `json:"text"`
-	ID   string `json:"id_str"`
-}
 
 var config *oauth1.Config
 var token *oauth1.Token
@@ -29,54 +21,35 @@ const pages = 2
 
 func makeMuxRouter() http.Handler {
 	muxRouter := mux.NewRouter()
-	muxRouter.HandleFunc("/", handleHome).Methods("GET")
-	// muxRouter.HandleFunc("/{id}", handleGetTweets).Methods("GET")
+	muxRouter.HandleFunc("/", handleRoot).Methods("GET")
+	muxRouter.HandleFunc("/home", handleHomeTimeline).Methods("GET")
 	return muxRouter
 }
 
-func handleHome(w http.ResponseWriter, r *http.Request) {
+func handleRoot(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, "Kudurru, written in Stone 🗿")
 }
 
-func handleGetTweets(w http.ResponseWriter, r *http.Request) {
-	// var maxIDQuery string
-	// var tweets []Tweet
+func handleHomeTimeline(w http.ResponseWriter, r *http.Request) {
 	// muxVars := mux.Vars(r)
 	// userHandle := muxVars["id"]
 
-	httpClient := config.Client(oauth1.NoContext, token)
-
-	for i := 0; i < pages; i++ {
-		path := fmt.Sprintf("https://api.twitter.com/1.1/statues/home_timeline.json")
-
-		if strings.Contains(path, "favicon.ico") {
-			break
-		}
-
-		resp, err := httpClient.Get(path)
-		if err != nil {
-			respondWithError(err, w)
-			break
-		}
-
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			respondWithError(err, w)
-			break
-		}
-
-		// var gotTweets []Tweet
-		// err = json.Unmarshal(body, &gotTweets)
-		// if err != nil {
-		// 	fmt.Printf("Error unmarshaling %v", err)
-		// 	respondWithError(err, w)
-		// 	break
-		// }
-		fmt.Printf("raw response body: \n%v\n", string(body))
-		// fmt.Println(gotTweets)
+	client := twitter.NewClient(httpClient)
+	tweets, resp, err := client.Timelines.HomeTimeline(
+		&twitter.HomeTimelineParams{Count: 10},
+	)
+	if err != nil {
+		respondWithError(err, w)
 	}
+	defer resp.Body.Close()
+
+	for _, tweet := range tweets {
+		fmt.Println(tweet.Text)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Success"))
 }
 
 func respondWithError(err error, w http.ResponseWriter) {
