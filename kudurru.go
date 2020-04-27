@@ -1,4 +1,4 @@
-package main
+package kudurru
 
 import (
 	"fmt"
@@ -20,7 +20,8 @@ var (
 	client     *twitter.Client
 )
 
-func main() {
+// New creates the server to connect with Twitter
+func New() *http.Server {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal(err)
@@ -31,17 +32,12 @@ func main() {
 	httpClient = config.Client(oauth1.NoContext, token)
 	client = twitter.NewClient(httpClient)
 
-	s := &http.Server{
+	return &http.Server{
 		Addr:           "127.0.0.1:" + os.Getenv("PORT"),
 		Handler:        makeMuxRouter(),
 		ReadTimeout:    20 * time.Second,
 		WriteTimeout:   120 * time.Second,
 		MaxHeaderBytes: 1 << 20,
-	}
-
-	fmt.Println("Kudurru listening on port:", os.Getenv("PORT"))
-	if err := s.ListenAndServe(); err != nil {
-		log.Fatal(err)
 	}
 }
 
