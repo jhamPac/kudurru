@@ -13,6 +13,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// StartupMessage when the server fires
+const StartupMessage = "Kudurru, written in Stone 🗿"
+
 var (
 	config     *oauth1.Config
 	token      *oauth1.Token
@@ -52,7 +55,7 @@ func makeMuxRouter() http.Handler {
 // HandleRoot serves the / path
 func HandleRoot(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, "Kudurru, written in Stone 🗿")
+	fmt.Fprint(w, StartupMessage)
 }
 
 // HandleHomeTimeline fetches the authenticated home time line
