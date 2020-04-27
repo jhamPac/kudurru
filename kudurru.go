@@ -43,18 +43,20 @@ func New() *http.Server {
 
 func makeMuxRouter() http.Handler {
 	muxRouter := mux.NewRouter()
-	muxRouter.HandleFunc("/", handleRoot).Methods("GET")
-	muxRouter.HandleFunc("/home", handleHomeTimeline).Methods("GET")
-	muxRouter.HandleFunc("/user/{id}", handleUserTimeline).Methods("GET")
+	muxRouter.HandleFunc("/", HandleRoot).Methods("GET")
+	muxRouter.HandleFunc("/home", HandleHomeTimeline).Methods("GET")
+	muxRouter.HandleFunc("/user/{id}", HandleUserTimeline).Methods("GET")
 	return muxRouter
 }
 
-func handleRoot(w http.ResponseWriter, r *http.Request) {
+// HandleRoot serves the / path
+func HandleRoot(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, "Kudurru, written in Stone 🗿")
 }
 
-func handleHomeTimeline(w http.ResponseWriter, r *http.Request) {
+// HandleHomeTimeline fetches the authenticated home time line
+func HandleHomeTimeline(w http.ResponseWriter, r *http.Request) {
 	tweets, resp, err := client.Timelines.HomeTimeline(
 		&twitter.HomeTimelineParams{Count: 11},
 	)
@@ -68,7 +70,8 @@ func handleHomeTimeline(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleUserTimeline(w http.ResponseWriter, r *http.Request) {
+// HandleUserTimeline fetches the time line of the provided user
+func HandleUserTimeline(w http.ResponseWriter, r *http.Request) {
 	muxVars := mux.Vars(r)
 	userHandle := muxVars["id"]
 
