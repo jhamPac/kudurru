@@ -13,8 +13,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const pages = 2
-
 var (
 	config     *oauth1.Config
 	token      *oauth1.Token
