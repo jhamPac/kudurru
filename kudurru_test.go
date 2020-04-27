@@ -12,6 +12,7 @@ import (
 func TestGetRoot(t *testing.T) {
 	expected := kudurru.StartupMessage
 	var got string
+
 	req, err := http.NewRequest("GET", "/", nil)
 	if err != nil {
 		t.Fatal(err)
@@ -26,9 +27,12 @@ func TestGetRoot(t *testing.T) {
 	}
 
 	resp := rr.Result()
-	body, _ := ioutil.ReadAll(resp.Body)
-	got = string(body)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("error reading body from response %v", err)
+	}
 	defer resp.Body.Close()
+	got = string(body)
 
 	if expected != got {
 		t.Errorf("expected %v but got %v", expected, got)
