@@ -92,12 +92,12 @@ func HandleUserTimeline(w http.ResponseWriter, r *http.Request) {
 	defer resp.Body.Close()
 
 	for _, tweet := range tweets {
-		var str strings.Builder
-		str.WriteString(tweet.FullText)
-		str.WriteString("\n\n")
-		str.WriteString(strings.Repeat("+", 20))
-		str.WriteString("\n\n")
-		w.Write([]byte(str.String()))
+		var buffer strings.Builder
+		buffer.WriteString(tweet.FullText)
+		buffer.WriteString("\n\n")
+		buffer.WriteString(strings.Repeat("+", 20))
+		buffer.WriteString("\n\n")
+		w.Write([]byte(buffer.String()))
 	}
 }
 
