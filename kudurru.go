@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
@@ -91,8 +92,12 @@ func HandleUserTimeline(w http.ResponseWriter, r *http.Request) {
 	defer resp.Body.Close()
 
 	for _, tweet := range tweets {
-		w.Write([]byte(tweet.FullText))
-		fmt.Fprintf(w, "\n>\n")
+		var str strings.Builder
+		str.WriteString(tweet.FullText)
+		str.WriteString("\n\n")
+		str.WriteString(strings.Repeat("+", 20))
+		str.WriteString("\n\n")
+		w.Write([]byte(str.String()))
 	}
 }
 
