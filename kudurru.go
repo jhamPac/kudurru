@@ -22,7 +22,7 @@ const StartupMessage = "Kudurru, written in Stone 🗿"
 var (
 	config     *clientcredentials.Config
 	httpClient *http.Client
-	client     *twitter.Client
+	twClient   *twitter.Client
 )
 
 // New creates the server to connect with Twitter
@@ -32,7 +32,7 @@ func New() *http.Server {
 		log.Fatal(err)
 	}
 
-	sh = shell.NewShell("https://ipfs.infura.io:5001")
+	infuraGWY = shell.NewShell("https://ipfs.infura.io:5001")
 
 	config = &clientcredentials.Config{
 		ClientID:     os.Getenv("APIKEY"),
@@ -40,7 +40,7 @@ func New() *http.Server {
 		TokenURL:     "https://api.twitter.com/oauth2/token",
 	}
 	httpClient = config.Client(oauth2.NoContext)
-	client = twitter.NewClient(httpClient)
+	twClient = twitter.NewClient(httpClient)
 
 	return &http.Server{
 		Addr:           "127.0.0.1:" + os.Getenv("PORT"),
@@ -67,7 +67,7 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 
 // HandleHomeTimeline fetches the authenticated home time line
 func HandleHomeTimeline(w http.ResponseWriter, r *http.Request) {
-	tweets, resp, err := client.Timelines.HomeTimeline(
+	tweets, resp, err := twClient.Timelines.HomeTimeline(
 		&twitter.HomeTimelineParams{Count: 11},
 	)
 	if err != nil {
@@ -85,7 +85,7 @@ func HandleUserTimeline(w http.ResponseWriter, r *http.Request) {
 	muxVars := mux.Vars(r)
 	userHandle := muxVars["id"]
 
-	tweets, resp, err := client.Timelines.UserTimeline(
+	tweets, resp, err := twClient.Timelines.UserTimeline(
 		&twitter.UserTimelineParams{
 			ScreenName:     userHandle,
 			Count:          11,
