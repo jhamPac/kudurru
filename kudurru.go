@@ -10,6 +10,7 @@ import (
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/gorilla/mux"
+	shell "github.com/ipfs/go-ipfs-api"
 	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
@@ -30,6 +31,8 @@ func New() *http.Server {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	sh = shell.NewShell("https://ipfs.infura.io:5001")
 
 	config = &clientcredentials.Config{
 		ClientID:     os.Getenv("APIKEY"),
