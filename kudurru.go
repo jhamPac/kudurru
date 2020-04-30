@@ -32,7 +32,7 @@ func New() *http.Server {
 		log.Fatal(err)
 	}
 
-	infuraGWY = shell.NewShell("https://ipfs.infura.io:5001")
+	ipfsGWY = shell.NewShell("https://ipfs.infura.io:5001")
 
 	config = &clientcredentials.Config{
 		ClientID:     os.Getenv("APIKEY"),
