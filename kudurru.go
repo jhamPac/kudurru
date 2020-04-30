@@ -9,17 +9,17 @@ import (
 	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
-	"github.com/dghubble/oauth1"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/clientcredentials"
 )
 
 // StartupMessage when the server fires
 const StartupMessage = "Kudurru, written in Stone 🗿"
 
 var (
-	config     *oauth1.Config
-	token      *oauth1.Token
+	config     *clientcredentials.Config
 	httpClient *http.Client
 	client     *twitter.Client
 )
@@ -31,9 +31,12 @@ func New() *http.Server {
 		log.Fatal(err)
 	}
 
-	config = oauth1.NewConfig(os.Getenv("APIKEY"), os.Getenv("APISECRET"))
-	token = oauth1.NewToken(os.Getenv("TOKEN"), os.Getenv("TOKENSECRET"))
-	httpClient = config.Client(oauth1.NoContext, token)
+	config = &clientcredentials.Config{
+		ClientID:     os.Getenv("APIKEY"),
+		ClientSecret: os.Getenv("APISECRET"),
+		TokenURL:     "https://api.twitter.com/oauth2/token",
+	}
+	httpClient = config.Client(oauth2.NoContext)
 	client = twitter.NewClient(httpClient)
 
 	return &http.Server{
@@ -82,7 +85,7 @@ func HandleUserTimeline(w http.ResponseWriter, r *http.Request) {
 	tweets, resp, err := client.Timelines.UserTimeline(
 		&twitter.UserTimelineParams{
 			ScreenName:     userHandle,
-			Count:          10,
+			Count:          11,
 			TrimUser:       twitter.Bool(false),
 			ExcludeReplies: twitter.Bool(true),
 			TweetMode:      "extended"})
