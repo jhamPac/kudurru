@@ -8,7 +8,9 @@ require (
 	github.com/dghubble/go-twitter v0.0.0-20190719072343-39e5462e111f
 	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/gorilla/mux v1.7.4
-	github.com/ipfs/go-ipfs-config v0.5.3 // indirect
+	github.com/ipfs/go-ipfs v0.5.1
+	github.com/ipfs/go-ipfs-config v0.5.3
+	github.com/ipfs/interface-go-ipfs-core v0.3.0
 	github.com/joho/godotenv v1.3.0
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/libp2p/go-libp2p-core v0.5.3 // indirect
