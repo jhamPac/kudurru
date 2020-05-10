@@ -19,7 +19,7 @@ import (
 const StartupMessage = "Kudurru, written in Stone 🗿"
 
 var (
-	config     *clientcredentials.Config
+	configT    *clientcredentials.Config
 	httpClient *http.Client
 	twClient   *twitter.Client
 )
@@ -31,12 +31,12 @@ func New() *http.Server {
 		log.Fatal(err)
 	}
 
-	config = &clientcredentials.Config{
+	configT = &clientcredentials.Config{
 		ClientID:     os.Getenv("APIKEY"),
 		ClientSecret: os.Getenv("APISECRET"),
 		TokenURL:     "https://api.twitter.com/oauth2/token",
 	}
-	httpClient = config.Client(oauth2.NoContext)
+	httpClient = configT.Client(oauth2.NoContext)
 	twClient = twitter.NewClient(httpClient)
 
 	return &http.Server{
