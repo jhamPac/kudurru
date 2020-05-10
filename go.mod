@@ -3,7 +3,7 @@ module github.com/jhampac/kudurru
 go 1.14
 
 require (
-	bazil.org/fuse v0.0.0-20200430160008-602fc2ff4a00 // indirect
+	bazil.org/bazil v0.0.0-20191229194051-810cf82680de // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/davidlazar/go-crypto v0.0.0-20190912175916-7055855a373f // indirect
